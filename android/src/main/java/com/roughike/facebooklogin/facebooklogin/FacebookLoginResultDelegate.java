@@ -1,6 +1,7 @@
 package com.roughike.facebooklogin.facebooklogin;
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
