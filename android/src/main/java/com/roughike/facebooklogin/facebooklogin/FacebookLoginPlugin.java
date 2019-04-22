@@ -99,13 +99,13 @@ public class FacebookLoginPlugin implements MethodCallHandler {
 
     public static final class FacebookSignInDelegate {
         private final Registrar registrar;
-        private final CallbackManager callbackManager;
+        public static final CallbackManager callbackManager = CallbackManager.Factory.create();
         private final LoginManager loginManager;
         private final FacebookLoginResultDelegate resultDelegate;
 
         public FacebookSignInDelegate(Registrar registrar) {
             this.registrar = registrar;
-            this.callbackManager = CallbackManager.Factory.create();
+//            this.callbackManager = CallbackManager.Factory.create();
             this.loginManager = LoginManager.getInstance();
             this.resultDelegate = new FacebookLoginResultDelegate(callbackManager);
 
