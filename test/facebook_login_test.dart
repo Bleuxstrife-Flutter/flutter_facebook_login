@@ -10,10 +10,10 @@ void main() {
     const channel = MethodChannel('com.roughike/flutter_facebook_login');
 
     final beforeExpiry =
-        DateTime.fromMillisecondsSinceEpoch(1463378399999, isUtc: true);
+    DateTime.fromMillisecondsSinceEpoch(1463378399999, isUtc: true);
 
     final afterExpiry =
-        DateTime.fromMillisecondsSinceEpoch(1463378400001, isUtc: true);
+    DateTime.fromMillisecondsSinceEpoch(1463378400001, isUtc: true);
 
     const kAccessToken = {
       'token': 'test_token',
@@ -93,7 +93,7 @@ void main() {
     test('$FacebookAccessToken#toMap()', () async {
       setMethodCallResponse(kLoggedInResponse);
 
-      final result = await sut.logInWithReadPermissions([]);
+      final result = await sut.logIn([]);
       final map = result.accessToken.toMap();
 
       expect(
@@ -134,27 +134,17 @@ void main() {
     test('loginBehavior - nativeWithFallback is the default', () async {
       setMethodCallResponse(kCancelledByUserResponse);
 
-      await sut.logInWithReadPermissions(['email']);
-      await sut.loginWithPublishPermissions(['publish_actions']);
+      await sut.logIn(['email']);
 
       expect(
         log,
         [
           isMethodCall(
-            'loginWithReadPermissions',
+            'logIn',
             arguments: {
               'behavior': 'nativeWithFallback',
               'permissions': [
                 'email',
-              ],
-            },
-          ),
-          isMethodCall(
-            'loginWithPublishPermissions',
-            arguments: {
-              'behavior': 'nativeWithFallback',
-              'permissions': [
-                'publish_actions',
               ],
             },
           ),
@@ -166,40 +156,32 @@ void main() {
       setMethodCallResponse(kLoggedInResponse);
 
       sut.loginBehavior = FacebookLoginBehavior.nativeOnly;
-      await sut.logInWithReadPermissions([]);
-      await sut.loginWithPublishPermissions([]);
+      await sut.logIn([]);
 
       sut.loginBehavior = FacebookLoginBehavior.webOnly;
-      await sut.logInWithReadPermissions([]);
-      await sut.loginWithPublishPermissions([]);
+      await sut.logIn([]);
 
       sut.loginBehavior = FacebookLoginBehavior.webViewOnly;
-      await sut.logInWithReadPermissions([]);
-      await sut.loginWithPublishPermissions([]);
+      await sut.logIn([]);
 
       sut.loginBehavior = FacebookLoginBehavior.nativeWithFallback;
-      await sut.logInWithReadPermissions([]);
-      await sut.loginWithPublishPermissions([]);
+      await sut.logIn([]);
 
       expect(
         log,
         [
-          isReadPermissionLoginWithBehavior('nativeOnly'),
-          isPublishPermissionLoginWithBehavior('nativeOnly'),
-          isReadPermissionLoginWithBehavior('webOnly'),
-          isPublishPermissionLoginWithBehavior('webOnly'),
-          isReadPermissionLoginWithBehavior('webViewOnly'),
-          isPublishPermissionLoginWithBehavior('webViewOnly'),
-          isReadPermissionLoginWithBehavior('nativeWithFallback'),
-          isPublishPermissionLoginWithBehavior('nativeWithFallback'),
+          isLoginWithBehavior('nativeOnly'),
+          isLoginWithBehavior('webOnly'),
+          isLoginWithBehavior('webViewOnly'),
+          isLoginWithBehavior('nativeWithFallback'),
         ],
       );
     });
 
-    test('loginWithReadPermissions - user logged in', () async {
+    test('login - user logged in', () async {
       setMethodCallResponse(kLoggedInResponse);
 
-      final result = await sut.logInWithReadPermissions([
+      final result = await sut.logIn([
         'read_permission_1',
         'read_permission_2',
       ]);
@@ -211,7 +193,7 @@ void main() {
         log,
         [
           isMethodCall(
-            'loginWithReadPermissions',
+            'logIn',
             arguments: {
               'behavior': 'nativeWithFallback',
               'permissions': [
@@ -224,66 +206,19 @@ void main() {
       );
     });
 
-    test('loginWithReadPermissions - cancelled by user', () async {
+    test('login - cancelled by user', () async {
       setMethodCallResponse(kCancelledByUserResponse);
 
-      final result = await sut.logInWithReadPermissions([]);
+      final result = await sut.logIn([]);
 
       expect(result.status, FacebookLoginStatus.cancelledByUser);
       expect(result.accessToken, isNull);
     });
 
-    test('loginWithReadPermissions - error', () async {
+    test('login - error', () async {
       setMethodCallResponse(kErrorResponse);
 
-      final result = await sut.logInWithReadPermissions([]);
-
-      expect(result.status, FacebookLoginStatus.error);
-      expect(result.errorMessage, 'test error message');
-      expect(result.accessToken, isNull);
-    });
-
-    test('loginWithPublishPermissions - user logged in', () async {
-      setMethodCallResponse(kLoggedInResponse);
-
-      final result = await sut.loginWithPublishPermissions([
-        'publish_permission_1',
-        'publish_permission_2',
-      ]);
-
-      expect(result.status, FacebookLoginStatus.loggedIn);
-      expectAccessTokenParsedCorrectly(result.accessToken);
-
-      expect(
-        log,
-        [
-          isMethodCall(
-            'loginWithPublishPermissions',
-            arguments: {
-              'behavior': 'nativeWithFallback',
-              'permissions': [
-                'publish_permission_1',
-                'publish_permission_2',
-              ],
-            },
-          ),
-        ],
-      );
-    });
-
-    test('loginWithPublishPermissions - cancelled by user', () async {
-      setMethodCallResponse(kCancelledByUserResponse);
-
-      final result = await sut.loginWithPublishPermissions([]);
-
-      expect(result.status, FacebookLoginStatus.cancelledByUser);
-      expect(result.accessToken, isNull);
-    });
-
-    test('loginWithPublishPermissions - error', () async {
-      setMethodCallResponse(kErrorResponse);
-
-      final result = await sut.loginWithPublishPermissions([]);
+      final result = await sut.logIn([]);
 
       expect(result.status, FacebookLoginStatus.error);
       expect(result.errorMessage, 'test error message');
@@ -323,14 +258,14 @@ void main() {
     });
 
     test('get isLoggedIn - true when currentAccessToken is not null and valid',
-        () async {
-      setMethodCallResponse(kAccessToken);
+            () async {
+          setMethodCallResponse(kAccessToken);
 
-      Clock.dateTimeResolver = () => beforeExpiry;
+          Clock.dateTimeResolver = () => beforeExpiry;
 
-      final isLoggedIn = await sut.isLoggedIn;
-      expect(isLoggedIn, isTrue);
-    });
+          final isLoggedIn = await sut.isLoggedIn;
+          expect(isLoggedIn, isTrue);
+        });
 
     test('get currentAccessToken - handles null response gracefully', () async {
       setMethodCallResponse(null);
@@ -340,31 +275,31 @@ void main() {
     });
 
     test('get currentAccessToken - when token returned, parses it properly',
-        () async {
-      setMethodCallResponse(kAccessToken);
+            () async {
+          setMethodCallResponse(kAccessToken);
 
-      final accessToken = await sut.currentAccessToken;
-      expectAccessTokenParsedCorrectly(accessToken);
-    });
+          final accessToken = await sut.currentAccessToken;
+          expectAccessTokenParsedCorrectly(accessToken);
+        });
 
     test('FacebookAccessToken#isValid() - when not expired, returns true',
-        () async {
-      setMethodCallResponse(kAccessToken);
+            () async {
+          setMethodCallResponse(kAccessToken);
 
-      Clock.dateTimeResolver = () => beforeExpiry;
+          Clock.dateTimeResolver = () => beforeExpiry;
 
-      final accessToken = await sut.currentAccessToken;
-      expect(accessToken.isValid(), isTrue);
-    });
+          final accessToken = await sut.currentAccessToken;
+          expect(accessToken.isValid(), isTrue);
+        });
 
     test('FacebookAccessToken#isValid() - when expired, returns false',
-        () async {
-      setMethodCallResponse(kAccessToken);
+            () async {
+          setMethodCallResponse(kAccessToken);
 
-      Clock.dateTimeResolver = () => afterExpiry;
+          Clock.dateTimeResolver = () => afterExpiry;
 
-      final accessToken = await sut.currentAccessToken;
-      expect(accessToken.isValid(), isFalse);
-    });
+          final accessToken = await sut.currentAccessToken;
+          expect(accessToken.isValid(), isFalse);
+        });
   });
 }
